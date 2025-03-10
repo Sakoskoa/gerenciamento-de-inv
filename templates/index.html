@@ -4,24 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de Inventário</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <h1>Adicionar Novo Produto</h1>
     <form id="produtoForm">
         <label for="nome">Nome:</label><br>
-        <input type="text" id="nome" name="nome"><br><br>
+        <input type="text" id="nome" name="nome" required><br><br>
 
         <label for="descricao">Descrição:</label><br>
-        <input type="text" id="descricao" name="descricao"><br><br>
+        <input type="text" id="descricao" name="descricao" required><br><br>
 
         <label for="preco">Preço:</label><br>
-        <input type="number" id="preco" name="preco"><br><br>
+        <input type="number" id="preco" name="preco" step="0.01" required><br><br>
 
         <label for="quantidade">Quantidade:</label><br>
-        <input type="number" id="quantidade" name="quantidade"><br><br>
+        <input type="number" id="quantidade" name="quantidade" required><br><br>
 
         <button type="submit">Adicionar Produto</button>
     </form>
+
+    <h2>Lista de Produtos</h2>
+    <ul id="produtosList"></ul>
 
     <script>
         document.getElementById('produtoForm').addEventListener('submit', function(e) {
@@ -34,7 +38,8 @@
                 quantidade: document.getElementById('quantidade').value
             };
 
-            fetch('http://localhost:5000/produtos', {
+            // Envia os dados do produto para a API
+            fetch('/produtos', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -44,9 +49,28 @@
             .then(response => response.json())
             .then(data => {
                 alert(data.message);
+                listarProdutos();  // Atualiza a lista de produtos
             })
             .catch(error => console.log(error));
         });
+
+        // Função para listar os produtos
+        function listarProdutos() {
+            fetch('/produtos')
+            .then(response => response.json())
+            .then(data => {
+                const produtosList = document.getElementById('produtosList');
+                produtosList.innerHTML = '';  // Limpa a lista existente
+                data.forEach(produto => {
+                    const li = document.createElement('li');
+                    li.textContent = `${produto[1]} - ${produto[2]} - R$${produto[3]} - ${produto[4]} unidades`;
+                    produtosList.appendChild(li);
+                });
+            });
+        }
+
+        // Carrega os produtos ao iniciar a página
+        listarProdutos();
     </script>
 </body>
 </html>
